@@ -1,0 +1,43 @@
+%B3
+
+%Function to find illumination
+function [ avg_diff ] = Illumination(background)
+
+%Image properties
+num_rows = size(background,1)
+num_cols = size(background,2)
+
+%Testing Size
+sq_size = 5;
+total_size = sq_size*sq_size;
+
+%Testing Are
+usedheight = num_rows-mod(num_rows,sq_size);
+usedwidth = num_cols-mod(num_cols,sq_size);
+subheight = usedheight/sq_size;
+subwidth = usedwidth/sq_size;
+
+subregions = cell(1);
+
+for j = 1:sq_size
+    for i = 1:sq_size
+        heightstart = (j-1)*subheight+1;
+        widthstart = (i-1)*subwidth+1;
+        subregions((j-1)*sq_size+i)= mat2cell(background(heightstart:heightstart+subheight-1,widthstart:widthstart+subwidth-1),subheight,subwidth);
+    end
+end
+
+numregioncomparisons = nchoosek(total_size,2);
+numofsigdifferences = 0;
+
+for i=1:total_size-1
+    for j=(i+1):total_size
+        sr1 = subregions{i};
+        sr2 = subregions{j};
+        numofsigdifferences = numofsigdifferences+kstest2(sr1(:),sr2(:));
+    end
+end
+
+avg_diff = numofsigdifferences/numregioncomparisons;
+
+end
